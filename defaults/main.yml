@@ -1,0 +1,83 @@
+---
+# defaults file for etcd
+etcd_version: "v3.5.4"
+etcd_member_name: "{{ inventory_hostname }}"
+
+######## CONFIGURATION ########
+
+etcd_data_dir: "/opt/etcd/data"
+etcd_ct_data_dir: "/opt/etcd_data"
+etcd_conf_dir: "/opt/etcd/conf"
+etcd_ct_conf_dir: "/opt/etcd_conf"
+etcd_ct_wal_dir: "/opt/etcd_wal"
+
+etcd_snapshot_count: "1000"
+etcd_heartbeat_interval: "100"
+etcd_election_timeout: "1000"
+etcd_quota_backend_bytes: "0"
+etcd_listen_peer_urls:
+etcd_listen_client_urls:
+etcd_max_snapshots: "5"
+etcd_max_wals: "5"
+etcd_cors: ""
+etcd_discovery: ""
+etcd_discovery_fallback: "proxy"
+etcd_discovery_proxy: ""
+etcd_discovery_srv: ""
+etcd_cluster_name: "etcd"
+etcd_strict_reconfig_check: "false"
+etcd_enable_v2: "true"
+etcd_enable_pprof: "true"
+etcd_enable_proxy: False
+etcd_proxy: "off"
+etcd_proxy_failure_wait: "5000"
+etcd_proxy_refresh_interval: "30000"
+etcd_proxy_dial_timeout: "1000"
+etcd_proxy_write_timeout: "5000"
+etcd_proxy_read_timeout: "0"
+etcd_debug_mode: "false"
+etcd_log_outputs: "[stderr]"
+etcd_force_new_cluster: "false"
+etcd_auto_compaction_mode: "periodic"
+auto_compaction_retention: "1"
+
+
+etcd_client_port: 2379
+etcd_listen_port: 2379
+etcd_url_scheme: http
+etcd_peers_port: 2380
+etcd_peer_port: 2380
+etcd_interface: eth0
+etcd_client_interface: "{{ etcd_interface }}"
+etcd_peer_interface: "{{ etcd_interface }}"
+
+etcd_advertise_client_urls: "{{ etcd_client_url_scheme }}://{{ hostvars[inventory_hostname]['ansible_' + etcd_client_interface]['ipv4']['address'] }}:{{ etcd_client_port }}"
+etcd_listen_client_urls: "{{ etcd_client_url_scheme }}://0.0.0.0:{{ etcd_client_port }}"
+etcd_client_url_scheme: "{{ etcd_url_scheme }}"
+etcd_peer_url_scheme: "{{ etcd_url_scheme }}"
+etcd_initial_advertise_peer_urls: "{{ etcd_peer_url_scheme }}://{{ hostvars[inventory_hostname]['ansible_' + etcd_peer_interface]['ipv4']['address'] }}:{{ etcd_peer_port }}"
+etcd_listen_peer_urls: "{{ etcd_peer_url_scheme }}://0.0.0.0:{{ etcd_peer_port }}"
+etcd_initial_cluster_token: etcd-cluster-1
+etcd_initial_cluster_state: "new"
+etcd_initial_cluster: "
+            {% for host in groups['etcd'] -%}{{ host }}={{ etcd_peer_url_scheme }}://{{ hostvars[host]['ansible_' + etcd_peer_interface]['ipv4']['address'] }}:{{ etcd_peer_port }}{% if not loop.last %},{% endif %}{% endfor %}
+"
+
+
+########### NETWORK ###########
+
+#etcd_cert_file: 
+#etcd_key_file:
+#etcd_client_cert_auth: "false"
+#etcd_trusted_ca_file: ""
+#etcd_auto_tls: "false"
+
+######### DOCKER #########
+
+ct_etcd_image: "quay.io/coreos/etcd"
+ct_etcd_name: "etcd"
+ct_etcd_network: "etcd"
+ct_etcd_state: "started"
+ct_etcd_restart_policy: "always"
+ct_etcd_recreate: "yes"
+ct_etcd_restart: "yes"

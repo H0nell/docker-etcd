@@ -1,0 +1,35 @@
+---
+# tasks file for etcd-docker
+- name: Create data and configuration directory
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop: 
+    - "{{ etcd_data_dir }}"
+    - "{{ etcd_conf_dir }}"
+
+- name: template configuration file
+  become: true
+  template:
+    src: etcd.conf.j2
+    dest: "{{ etcd_conf_dir }}/etcd.conf"
+
+- name: deploy etcd docker container
+  become: true
+  docker_container:
+    name: "{{ ct_etcd_name }}"
+    image: "{{ ct_etcd_image }}"
+    state: "{{ ct_etcd_state }}"
+    restart_policy: "{{ ct_etcd_restart_policy }}"
+    recreate: "{{ ct_etcd_recreate }}"
+    restart: "{{ ct_etcd_restart }}"
+    ports:
+      - "{{ etcd_peer_port }}:{{ etcd_peer_port }}"
+      - "{{ etcd_listen_port }}:{{ etcd_listen_port }}" 
+    volumes:
+      - "{{ etcd_data_dir }}:{{ etcd_ct_data_dir }}"
+      - "{{ etcd_conf_dir }}:{{ etcd_ct_conf_dir }}"
+    command: [
+         "etcd --config-file {{ etcd_ct_conf_dir }}/etcd.conf"
+        ]
